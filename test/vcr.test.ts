@@ -3,7 +3,7 @@ import {catchError, concatMap, map, mapTo, mergeMap, take, tap, toArray} from 'r
 import tempy from 'tempy'
 import {fileStore} from '../src/fileStore'
 import {memoryStore} from '../src/memoryStore'
-import {withStore} from '../src/rx-vcr'
+import {withStore} from '../src/vcr'
 import {testObservable as test} from './testObservable'
 import {vcr as exportedVCR} from '../src'
 import {VCRMode} from '../src/types'
