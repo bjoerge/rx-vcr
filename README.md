@@ -1,6 +1,6 @@
-# rx-vcr 🎥
+# rx-vcr
 
-Record and replay RxJS streams
+🎥 Record and replay RxJS streams
 
 ### Usage
 

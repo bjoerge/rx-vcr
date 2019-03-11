@@ -1,4 +1,4 @@
-const {vcr} = require('./')
+const {vcr} = require('rx-vcr')
 const {range, timer} = require('rxjs')
 const {concatMap, mapTo, map} = require('rxjs/operators')
 
