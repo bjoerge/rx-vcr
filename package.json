@@ -10,7 +10,7 @@
   ],
   "main": "dist/rx-vcr.umd.js",
   "module": "dist/rx-vcr.es5.js",
-  "typings": "dist/types/rx-vcr.d.ts",
+  "typings": "dist/types/index.d.ts",
   "author": "Bjørge Næss <bjoerge@gmail.com>",
   "license": "MIT",
   "engines": {
