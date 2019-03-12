@@ -20,6 +20,7 @@
     "lint": "tslint --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "prebuild": "rimraf dist",
     "build": "tsc --module commonjs && rollup -c rollup.config.js",
+    "prepublish": "npm run build",
     "start": "rollup -c rollup.config.js -w",
     "browser": "parcel browser/index.html",
     "test": "jest --coverage",
