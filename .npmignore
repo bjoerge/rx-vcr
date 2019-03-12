@@ -1,2 +1,8 @@
 coverage
-node_modules
+.DS_Store
+*.log
+.vscode
+.idea
+.cache
+.rpt2_cache
+browser
