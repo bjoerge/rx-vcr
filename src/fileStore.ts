@@ -14,13 +14,11 @@ const readFile = (filename: string) => fs.readFileSync(filename, 'utf-8')
 export const withFs = (fileSys: Fs) => <T>(filename: string): RecordingStore<T> => {
   const events: Array<RecordedValue<T>> = []
   return {
-    hasRecording() {
-      return fileSys.existsSync(filename)
-    },
-    write(value: RecordedValue<T>) {
+    hasRecording: () => fileSys.existsSync(filename),
+    write: (value: RecordedValue<T>) => {
       events.push(value)
     },
-    flush() {
+    flush: () => {
       fileSys.writeFile(filename, JSON.stringify(events), err => {
         /* istanbul ignore if  */
         if (err) {

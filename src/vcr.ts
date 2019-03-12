@@ -35,16 +35,15 @@ export const record = <T>(store: RecordingStore<T>) => (input$: Observable<T>) =
   )
 }
 
-export const replay = <T>(store: RecordingStore<T>, options?: ReplayOptions) => (
+export const replay = <T>(store: RecordingStore<T>, options: ReplayOptions = {}) => (
   input$: Observable<T>,
 ): Observable<T> => {
-  const speed = options && options.speed
   if (!store.hasRecording()) {
     // tslint:disable-next-line:no-console
     console.warn('[rx-vcr] In replay mode, but no recording found in file')
     return input$
   }
-  return store.recording$.pipe(replayEvents(speed))
+  return store.recording$.pipe(replayEvents({speed: options.speed, capDelay: options.capDelay}))
 }
 
 const checkRecording = <T>(store: RecordingStore<T>, options?: ReplayOptions) => (

@@ -213,3 +213,42 @@ test(`replay with speed`, () => {
     }),
   )
 })
+
+test(`replay with capDelay`, () => {
+  let start: Date
+  const INTERVAL = 10
+  const VALUES = 4
+  const REPLAY_SPEED = 20
+  const REPLAY_CAP_DELAY = 1
+  const events$ = defer(() => {
+    start = new Date()
+    return interval(INTERVAL).pipe(take(VALUES))
+  })
+
+  const store = memoryStore()
+  const vcr = withStore(store)
+
+  const values$ = events$.pipe(vcr('auto', {speed: REPLAY_SPEED, capDelay: REPLAY_CAP_DELAY}))
+
+  let durationActualRun: number
+  let durationReplay: number
+  return values$.pipe(
+    toArray(),
+    tap(() => (durationActualRun = new Date().getTime() - start.getTime())),
+    mergeMap(sourceEvents => {
+      const startReplay = new Date()
+      return values$.pipe(
+        toArray(),
+        tap(() => (durationReplay = new Date().getTime() - startReplay.getTime())),
+        map(recordedEvents => [sourceEvents, recordedEvents]),
+      )
+    }),
+    tap(([sourceEvents, recordedEvents]) => {
+      expect(sourceEvents).toEqual(recordedEvents)
+      expect(durationActualRun).toBeGreaterThan(INTERVAL * VALUES - 10)
+      expect(durationActualRun).toBeLessThan(INTERVAL * VALUES + 10)
+      expect(durationReplay).toBeGreaterThan(VALUES * REPLAY_CAP_DELAY - 10)
+      expect(durationReplay).toBeLessThan(VALUES * REPLAY_CAP_DELAY + 10)
+    }),
+  )
+})

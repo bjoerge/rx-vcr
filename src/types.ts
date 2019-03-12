@@ -4,6 +4,7 @@ export type VCRMode = 'auto' | 'record' | 'replay' | 'noop'
 
 export interface ReplayOptions {
   speed?: number
+  capDelay?: number
 }
 
 export interface RecordedError {
