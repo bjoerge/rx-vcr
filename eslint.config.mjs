@@ -43,10 +43,7 @@ export default [
       '@typescript-eslint/no-empty-interface': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {prefer: 'type-imports'},
-      ],
+      '@typescript-eslint/consistent-type-imports': ['error', {prefer: 'type-imports'}],
       '@typescript-eslint/no-dupe-class-members': ['error'],
       '@typescript-eslint/no-shadow': ['error'],
       'unused-imports/no-unused-imports': 'error',
