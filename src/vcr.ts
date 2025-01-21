@@ -4,9 +4,8 @@ import {tap} from 'rxjs/operators'
 import {replayEvents} from './replay'
 import {type RecordingStore, type ReplayOptions, type VCRMode} from './types'
 
-export const record =
-  <T>(store: RecordingStore<T>) =>
-  (input$: Observable<T>) => {
+export function record<T>(store: RecordingStore<T>) {
+  return (input$: Observable<T>) => {
     let prev = new Date()
     return input$.pipe(
       tap({
@@ -37,6 +36,7 @@ export const record =
       }),
     )
   }
+}
 
 export const replay = <T>(store: RecordingStore<T>, options: ReplayOptions = {}) => {
   return (input$: Observable<T>): Observable<T> => {

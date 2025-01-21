@@ -4,16 +4,16 @@ import {readFile, writeFile} from 'node:fs/promises'
 import {defer, from, of} from 'rxjs'
 import {map, mergeMap} from 'rxjs/operators'
 
-import {type RecordedValue, type RecordingStore} from './types'
+import {type RecordedValue, type RecordingStore} from '../types'
 
-interface Fs {
+interface File {
   existsSync: (path: string) => boolean
   writeFile: (path: string, data: string) => Promise<void>
   readFile: (path: string) => Promise<string>
 }
 
-export const withFs =
-  (fileSys: Fs) =>
+const withFs =
+  (fileSys: File) =>
   <T>(filename: string): RecordingStore<T> => {
     const events: Array<RecordedValue<T>> = []
     return {
@@ -40,7 +40,11 @@ export const withFs =
     }
   }
 
-export const fileStore = withFs({
+/**
+ * Create store that will save to file
+ * @public
+ */
+export const createFileStore = withFs({
   existsSync: (path: string) => existsSync(path),
   writeFile: (path: string, data: string) => writeFile(path, data),
   readFile: (path: string) => readFile(path, 'utf-8'),

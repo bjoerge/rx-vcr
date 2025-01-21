@@ -3,15 +3,15 @@ import {catchError, concatMap, map, mapTo, mergeMap, take, tap, toArray} from 'r
 import {temporaryFile} from 'tempy'
 import {expect} from 'vitest'
 
-import {vcr as exportedVCR} from '../src'
-import {fileStore} from '../src/fileStore'
-import {memoryStore} from '../src/memoryStore'
+import {vcr as exportedVcr} from '../src'
 import {replayEvents} from '../src/replay'
+import {createFileStore} from '../src/store/file'
+import {createMemoryStore} from '../src/store/memory'
 import {type VCRMode} from '../src/types'
 import {withStore} from '../src/vcr'
 import {testObservable as test} from './testObservable'
 
-const testAuto = (storeName: string, operator: typeof exportedVCR) => {
+const testAuto = (storeName: string, operator: typeof exportedVcr) => {
   test(`Using ${storeName}: auto calls source observable only once`, () => {
     let sideEffectCallCount = 0
     const sideEffect$ = defer(() => {
@@ -33,21 +33,22 @@ const testAuto = (storeName: string, operator: typeof exportedVCR) => {
   })
 }
 
-testAuto('default (no filename)', exportedVCR)
+testAuto('default (no filename)', exportedVcr)
 testAuto('default (with filename)', (mode: VCRMode) =>
-  exportedVCR(mode, {filename: temporaryFile()}),
+  exportedVcr(mode, {store: createFileStore(temporaryFile())}),
 )
-testAuto('memory store', withStore(memoryStore()))
-testAuto('file store', withStore(fileStore(temporaryFile())))
+
+testAuto('memory store', withStore(createMemoryStore()))
+testAuto('file store', withStore(createFileStore(temporaryFile())))
 
 test(`record mode actually records events`, () => {
   const events$ = defer(() =>
     range(10).pipe(
       concatMap(() => timer(10)),
-      mapTo({result: 'foo'}),
+      map(() => ({result: 'foo'})),
     ),
   )
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
 
   return events$.pipe(
@@ -75,7 +76,7 @@ test(`recording an observable that fails`, () => {
     )
   })
 
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
   const recorded$ = events$.pipe(
     vcr('auto'),
@@ -107,7 +108,7 @@ test(`replaying when there's no recording available`, () => {
     )
   })
 
-  const store = fileStore(temporaryFile())
+  const store = createFileStore(temporaryFile())
   const vcr = withStore(store)
   const recorded$ = events$.pipe(
     vcr('replay'),
@@ -135,7 +136,7 @@ test(`noop mode`, () => {
     return range(10)
   })
 
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
   const noop$ = events$.pipe(vcr('noop'))
 
@@ -161,7 +162,7 @@ test(`record mode`, () => {
     return range(10)
   })
 
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
   const noop$ = events$.pipe(vcr('record'))
 
@@ -190,7 +191,7 @@ test(`replay with speed`, () => {
     return interval(INTERVAL).pipe(take(VALUES))
   })
 
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
 
   const values$ = events$.pipe(vcr('auto', {speed: REPLAY_SPEED}))
@@ -229,7 +230,7 @@ test(`replay with capDelay`, () => {
     return interval(INTERVAL).pipe(take(VALUES))
   })
 
-  const store = memoryStore()
+  const store = createMemoryStore()
   const vcr = withStore(store)
 
   const values$ = events$.pipe(vcr('auto', {speed: REPLAY_SPEED, capDelay: REPLAY_CAP_DELAY}))

@@ -1,4 +1,4 @@
-import {memoryStore, withStore} from 'rx-vcr'
+import {memory, withStore} from 'rx-vcr'
 import {fromEvent, interval} from 'rxjs'
 import {switchMap, take, tap} from 'rxjs/operators'
 
@@ -7,7 +7,7 @@ if (!button) {
   throw new Error('no button')
 }
 
-const vcr = withStore(memoryStore())
+const vcr = withStore(memory())
 
 const click$ = fromEvent(button, 'click')
   .pipe(

@@ -6,6 +6,9 @@
     "record",
     "replay",
     "rxjs",
+    "rx",
+    "vcr",
+    "typescript",
     "mock"
   ],
   "sideEffects": false,
@@ -16,6 +19,18 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
+    },
+    "./store/file": {
+      "source": "./src/store/file.ts",
+      "import": "./dist/store/file.js",
+      "require": "./dist/store/file.cjs",
+      "default": "./dist/store/file.js"
+    },
+    "./store/localstorage": {
+      "source": "./src/store/localstorage.ts",
+      "import": "./dist/store/localstorage.js",
+      "require": "./dist/store/localstorage.cjs",
+      "default": "./dist/store/localstorage.js"
     },
     "./package.json": "./package.json"
   },
