@@ -1,8 +1,0 @@
-coverage
-.DS_Store
-*.log
-.vscode
-.idea
-.cache
-.rpt2_cache
-browser

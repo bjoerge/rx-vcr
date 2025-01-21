@@ -1,5 +1,6 @@
 import {defer, from} from 'rxjs'
-import {RecordedValue, RecordingStore} from './types'
+
+import {type RecordedValue, type RecordingStore} from './types'
 
 export const memoryStore = <T>(): RecordingStore<T> => {
   let recording: Array<RecordedValue<T>> | null = null

@@ -1,13 +1,15 @@
 import {concat, defer, interval, of, range, throwError, timer} from 'rxjs'
 import {catchError, concatMap, map, mapTo, mergeMap, take, tap, toArray} from 'rxjs/operators'
-import tempy from 'tempy'
+import {temporaryFile} from 'tempy'
+import {expect} from 'vitest'
+
+import {vcr as exportedVCR} from '../src'
 import {fileStore} from '../src/fileStore'
 import {memoryStore} from '../src/memoryStore'
+import {replayEvents} from '../src/replay'
+import {type VCRMode} from '../src/types'
 import {withStore} from '../src/vcr'
 import {testObservable as test} from './testObservable'
-import {vcr as exportedVCR} from '../src'
-import {VCRMode} from '../src/types'
-import {replayEvents} from '../src/replay'
 
 const testAuto = (storeName: string, operator: typeof exportedVCR) => {
   test(`Using ${storeName}: auto calls source observable only once`, () => {
@@ -32,9 +34,11 @@ const testAuto = (storeName: string, operator: typeof exportedVCR) => {
 }
 
 testAuto('default (no filename)', exportedVCR)
-testAuto('default (with filename)', (mode: VCRMode) => exportedVCR(mode, {filename: tempy.file()}))
+testAuto('default (with filename)', (mode: VCRMode) =>
+  exportedVCR(mode, {filename: temporaryFile()}),
+)
 testAuto('memory store', withStore(memoryStore()))
-testAuto('file store', withStore(fileStore(tempy.file())))
+testAuto('file store', withStore(fileStore(temporaryFile())))
 
 test(`record mode actually records events`, () => {
   const events$ = defer(() =>
@@ -49,11 +53,11 @@ test(`record mode actually records events`, () => {
   return events$.pipe(
     vcr('auto'),
     toArray(),
-    mergeMap(sourceEvents =>
+    mergeMap((sourceEvents) =>
       store.recording$.pipe(
         replayEvents(),
         toArray(),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       ),
     ),
     tap(([sourceEvents, recordedEvents]) => expect(sourceEvents).toEqual(recordedEvents)),
@@ -65,9 +69,9 @@ test(`recording an observable that fails`, () => {
   const events$ = defer(() => {
     callCount++
     return range(10).pipe(
-      concatMap(n => timer(10).pipe(mapTo(n))),
-      mergeMap(n => (n > 4 ? throwError(new Error(`Invalid number: ${n}`)) : of(n))),
-      map(n => ({square: n * n})),
+      concatMap((n) => timer(10).pipe(mapTo(n))),
+      mergeMap((n) => (n > 4 ? throwError(new Error(`Invalid number: ${n}`)) : of(n))),
+      map((n) => ({square: n * n})),
     )
   })
 
@@ -75,14 +79,14 @@ test(`recording an observable that fails`, () => {
   const vcr = withStore(store)
   const recorded$ = events$.pipe(
     vcr('auto'),
-    catchError(err => of(err)),
+    catchError((err) => of(err)),
   )
   return recorded$.pipe(
     toArray(),
-    mergeMap(sourceEvents =>
+    mergeMap((sourceEvents) =>
       recorded$.pipe(
         toArray(),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       ),
     ),
     tap(([sourceEvents, recordedEvents]) => {
@@ -97,24 +101,24 @@ test(`replaying when there's no recording available`, () => {
   const events$ = defer(() => {
     callCount++
     return range(10).pipe(
-      concatMap(n => timer(10).pipe(mapTo(n))),
-      mergeMap(n => (n > 4 ? throwError(new Error(`Invalid number: ${n}`)) : of(n))),
-      map(n => ({square: n * n})),
+      concatMap((n) => timer(10).pipe(mapTo(n))),
+      mergeMap((n) => (n > 4 ? throwError(new Error(`Invalid number: ${n}`)) : of(n))),
+      map((n) => ({square: n * n})),
     )
   })
 
-  const store = fileStore(tempy.file())
+  const store = fileStore(temporaryFile())
   const vcr = withStore(store)
   const recorded$ = events$.pipe(
     vcr('replay'),
-    catchError(err => of(err)),
+    catchError((err) => of(err)),
   )
   return recorded$.pipe(
     toArray(),
-    mergeMap(sourceEvents =>
+    mergeMap((sourceEvents) =>
       recorded$.pipe(
         toArray(),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       ),
     ),
     tap(([sourceEvents, recordedEvents]) => {
@@ -137,10 +141,10 @@ test(`noop mode`, () => {
 
   return noop$.pipe(
     toArray(),
-    mergeMap(sourceEvents =>
+    mergeMap((sourceEvents) =>
       noop$.pipe(
         toArray(),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       ),
     ),
     tap(([sourceEvents, recordedEvents]) => {
@@ -163,10 +167,10 @@ test(`record mode`, () => {
 
   return noop$.pipe(
     toArray(),
-    mergeMap(sourceEvents =>
+    mergeMap((sourceEvents) =>
       noop$.pipe(
         toArray(),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       ),
     ),
     tap(([sourceEvents, recordedEvents]) => {
@@ -196,12 +200,12 @@ test(`replay with speed`, () => {
   return values$.pipe(
     toArray(),
     tap(() => (durationActualRun = new Date().getTime() - start.getTime())),
-    mergeMap(sourceEvents => {
+    mergeMap((sourceEvents) => {
       const startReplay = new Date()
       return values$.pipe(
         toArray(),
         tap(() => (durationReplay = new Date().getTime() - startReplay.getTime())),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       )
     }),
     tap(([sourceEvents, recordedEvents]) => {
@@ -235,12 +239,12 @@ test(`replay with capDelay`, () => {
   return values$.pipe(
     toArray(),
     tap(() => (durationActualRun = new Date().getTime() - start.getTime())),
-    mergeMap(sourceEvents => {
+    mergeMap((sourceEvents) => {
       const startReplay = new Date()
       return values$.pipe(
         toArray(),
         tap(() => (durationReplay = new Date().getTime() - startReplay.getTime())),
-        map(recordedEvents => [sourceEvents, recordedEvents]),
+        map((recordedEvents) => [sourceEvents, recordedEvents]),
       )
     }),
     tap(([sourceEvents, recordedEvents]) => {

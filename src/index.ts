@@ -1,13 +1,20 @@
-import {MonoTypeOperatorFunction} from 'rxjs'
-import {fileStore} from './fileStore'
+import {type MonoTypeOperatorFunction} from 'rxjs'
+
 import {memoryStore} from './memoryStore'
-import {ReplayOptions, VCRMode} from './types'
+import {type RecordingStore, type ReplayOptions, type VCRMode} from './types'
 import {withStore} from './vcr'
 
+export {memoryStore, withStore}
+/**
+ *
+ * @param mode
+ * @param options
+ * @public
+ */
 export const vcr = <T>(
   mode: VCRMode,
-  options?: ReplayOptions & {filename?: string},
+  options?: ReplayOptions & {getStorage?: () => RecordingStore<T>},
 ): MonoTypeOperatorFunction<T> => {
-  const store = options && options.filename ? fileStore<T>(options.filename) : memoryStore<T>()
-  return withStore(store)(mode, options)
+  const getStorage = options?.getStorage ?? memoryStore
+  return withStore(getStorage())(mode, options)
 }
